@@ -1,80 +1,92 @@
 
 #include "LogicGate.h"
-
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
 #include <sstream>
 
-enum GateType
-{
-    AND = 1,
-    OR = 2,
-    NOT = 3
-};
-
-struct Connection
-{
-    int gateNumber;
-    int pinNumber;
-};
-
-struct Gate
-{
-    GateType type;
-    std::vector<Connection> inputs;
-};
 
 class LogicCircuit
 {
 private:
     int inputPinsCount;
     int gatesCount;
-    std::vector<Gate> gates;
+    std::vector<std::shared_ptr<LogicGate>> gates;
+    std::vector<std::shared_ptr<LogicGate>> iPins;
+    std::vector<std::shared_ptr<LogicGate>> oPins;
 
 public:
     bool loadFromFile(const std::string &filePath)
     {
         std::ifstream file(filePath);
 
-        // std::ifstream file("input.txt");
         if (!file.is_open())
         {
             std::cerr << "無法開啟檔案" << std::endl;
-            return 1;
+            return false;
         }
-
         file >> inputPinsCount >> gatesCount;
         std::cout << inputPinsCount << std::endl;
         std::cout << gatesCount << std::endl;
 
-        // std::vector<std::vector<double>> numbers(n);
-        float flo;
-        gates.resize(gatesCount);
+        // Initialize iPins
+        iPins.resize(inputPinsCount);
+        // for (int i = 0; i < inputPinsCount; ++i)
+        // {
+        //     iPins[i] = nullptr; // Or gates[i] = std::make_shared<DefaultLogicGate>();
+        // }
 
+        // Initialize gates with nullptr or default gate
+        gates.resize(gatesCount);
+        // for (int i = 0; i < gatesCount; ++i)
+        // {
+        //     gates[i] = nullptr; // Or gates[i] = std::make_shared<DefaultLogicGate>();
+        // }
+    
         for (int i = 0; i < gatesCount; ++i)
         {
             int gateType;
             file >> gateType;
-            gates[i].type = static_cast<GateType>(gateType);
-            std::cout << "Type: " << gates[i].type << " ";
+            std::cout << "Type: " << gateType << std::endl;
+            std::vector<int> inputs;
+            std::vector<std::shared_ptr<LogicGate>> selecteGates;
             float input;
             while (file >> input && input != 0)
             {
-                // Connection conn;
-                std::cout << input << " ";
-                // if (input < 0) {
-                //     conn.gateNumber = 0;  // 表示這是一個輸入引腳
-                //     conn.pinNumber = -input;
-                // } else {
-                //     conn.gateNumber = input;
-                //     file.ignore();  // 忽略小數點
-                //     file >> conn.pinNumber;
-                // }
-                // gates[i].inputs.push_back(conn);
+                int ii = (int)input;
+                std::cout << ii << " ";
+                if(input < 0){
+                    selecteGates.push_back(iPins[-ii-1]);
+                }else{
+                    selecteGates.push_back(gates[input-1]);
+                }
+                
             }
             std::cout<<" "<<std::endl;
+
+            std::shared_ptr<LogicGate> newGate;
+            switch (gateType)
+            {
+            case 1:
+                newGate = std::make_shared<AndGate>(selecteGates);
+                break;
+            case 2:
+                newGate = std::make_shared<OrGate>(selecteGates);
+                break;
+            case 3:
+                newGate = std::make_shared<NotGate>(selecteGates);
+                break;
+            
+            default:
+                break;
+            }
+
+            if(newGate)
+            {
+                gates[i] = newGate;
+            }
         }
 
         file.close();
@@ -162,8 +174,12 @@ int main()
         case 4:
             std::cout << "Goodbye, thanks for using LS.\n";
             return 0;
+        case 5:
+            std::cout << "Test.\n";
+            circuit.loadFromFile("File1.lcf");
         default:
             std::cout << "Invalid command. Please try again.\n";
+            
         }
     }
 

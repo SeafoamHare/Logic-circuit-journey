@@ -1,35 +1,64 @@
+#ifndef LOGICGATE_H
+#define LOGICGATE_H
 
 #include <iostream>
 #include <vector>
 #include <memory>
 #include <stdexcept>
-
+#include <cstdint>
 
 class LogicGate {
 public:
-    LogicGate() : output_(-1) {}
+    LogicGate();
+    virtual ~LogicGate() = default;
+    bool isHaveAlliPinValue() const;
+    int8_t getOutput();
 
-    // 檢查所有輸入引腳是否都有數值
-    bool isHaveAlliPinValue() const {
-        for (const auto& pin : ipin_) {
-            if (pin == nullptr) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // 獲取輸出
-    int getOutput() const {
-        if (!isHaveAlliPinValue()) {
-            throw std::runtime_error("Not all input pins have values.");
-        }
-        return output_;
-    }
+    /// @overload
+    /// @brief LogicGet for And, Or, Not
+    void addInputPin(std::shared_ptr<LogicGate> pin);
+    /// @brief for InputPin
+    void addInputPin(int8_t pin);
 
 protected:
-    std::vector<std::shared_ptr<LogicGate>> ipin_;  //  iPin for this gate
-    int output_;  // 輸出
+    std::vector<std::shared_ptr<LogicGate>> ipin_vector_;
+    int8_t output_; 
 
-    virtual void compute() = 0;  // gate apply logic
+    virtual void compute() = 0; 
 };
+
+class AndGate : public LogicGate {
+public:
+    AndGate(std::vector<std::shared_ptr<LogicGate>> inputVector);
+
+protected:
+    void compute() override;
+};
+
+class OrGate : public LogicGate {
+public:
+    OrGate(std::vector<std::shared_ptr<LogicGate>> inputVector);
+
+protected:
+    void compute() override;
+};
+
+class NotGate : public LogicGate {
+public:
+    NotGate(std::vector<std::shared_ptr<LogicGate>> inputVector);
+
+protected:
+    void compute() override;
+};
+
+class InputPin : public LogicGate {
+public:
+    InputPin(std::vector<std::shared_ptr<LogicGate>> inputVector);
+};
+
+class OutputPin : public LogicGate {
+public:
+    OutputPin(std::vector<std::shared_ptr<LogicGate>> inputVector);
+};
+
+#endif // LOGICGATE_H
