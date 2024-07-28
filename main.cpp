@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
-
+#include <cmath>
 
 class LogicCircuit
 {
@@ -14,8 +14,8 @@ private:
     int inputPinsCount;
     int gatesCount;
     std::vector<std::shared_ptr<LogicGate>> gates;
-    std::vector<std::shared_ptr<LogicGate>> iPins;
-    std::vector<std::shared_ptr<LogicGate>> oPins;
+    std::vector<std::shared_ptr<LogicGate>> _iPins;
+    std::vector<int8_t> _oPins;
 
 public:
     bool loadFromFile(const std::string &filePath)
@@ -32,51 +32,42 @@ public:
         std::cout << gatesCount << std::endl;
 
         // Initialize iPins
-        iPins.resize(inputPinsCount);
-        // for (int i = 0; i < inputPinsCount; ++i)
-        // {
-        //     iPins[i] = nullptr; // Or gates[i] = std::make_shared<DefaultLogicGate>();
-        // }
+        _iPins.resize(inputPinsCount);
+        for (int i = 0; i < inputPinsCount; i++)
+        {
+            _iPins[i] = std::make_shared<InputPin>();
+        }
 
         // Initialize gates with nullptr or default gate
         gates.resize(gatesCount);
-        // for (int i = 0; i < gatesCount; ++i)
-        // {
-        //     gates[i] = nullptr; // Or gates[i] = std::make_shared<DefaultLogicGate>();
-        // }
-    
-        for (int i = 0; i < gatesCount; ++i)
+
+        std::vector<std::vector<int>> gatesiPin_list(gatesCount);
+        for (int i = 0; i < gatesCount; i++)
         {
             int gateType;
             file >> gateType;
             std::cout << "Type: " << gateType << std::endl;
             std::vector<int> inputs;
-            std::vector<std::shared_ptr<LogicGate>> selecteGates;
             float input;
             while (file >> input && input != 0)
             {
                 int ii = (int)input;
                 std::cout << ii << " ";
-                if(input < 0){
-                    selecteGates.push_back(iPins[-ii-1]);
-                }else{
-                    selecteGates.push_back(gates[input-1]);
-                }
+                gatesiPin_list[i].push_back(ii);
                 
             }
             std::cout<<" "<<std::endl;
-
             std::shared_ptr<LogicGate> newGate;
             switch (gateType)
             {
             case 1:
-                newGate = std::make_shared<AndGate>(selecteGates);
+                newGate = std::make_shared<AndGate>();
                 break;
             case 2:
-                newGate = std::make_shared<OrGate>(selecteGates);
+                newGate = std::make_shared<OrGate>();
                 break;
             case 3:
-                newGate = std::make_shared<NotGate>(selecteGates);
+                newGate = std::make_shared<NotGate>();
                 break;
             
             default:
@@ -87,10 +78,33 @@ public:
             {
                 gates[i] = newGate;
             }
+            std::cout<<gates[i]<<std::endl;
+        }
+
+        for(int i=0; i<gatesCount; i++){
+            for(auto ipin: gatesiPin_list[i])
+            {
+                if(ipin < 0)
+                {
+                    gates[i]->addInputPin(_iPins[-ipin-1]);
+                }else
+                {
+                    gates[i]->addInputPin(gates[ipin-1]);
+                }
+                
+            }
         }
 
         file.close();
         return true;
+    }
+    
+    const int get_inputPinsCount(){
+        return inputPinsCount;
+    }
+
+    const int get_gatesCount(){
+        return gatesCount;
     }
 
     void printCircuitInfo()
@@ -99,7 +113,40 @@ public:
                   << gatesCount << " gates\n";
     }
 
-    // 其他方法如 simulate 和 displayTruthTable 將在這裡實現
+    std::vector<int8_t> simuulate(std::vector<int8_t> iPins)
+    {
+        std::cout<<"Simuulate"<<std::endl;
+        for(int i=0; i<inputPinsCount; i++)
+        {
+            _iPins[i]->addInputPin(iPins[i]);
+            std::cout<<_iPins[i]<<" ";
+            std::cout<<_iPins[i]->getOutput()<<" ";
+        }
+
+       
+        bool undone = true;
+        while(undone){
+            undone = false;
+            for(int i=0; i<gatesCount; i++)
+            {
+                std::cout<<"point: "<<gates[i]<<std::endl;
+                if(gates[i]->getOutput()==UNINITIALIZED){
+                    undone=true;
+                    gates[i]->compute();
+                }
+                std::cout<<"oup; "<<static_cast<int>(gates[i]->getOutput())<<std::endl;
+            }
+            std::cout<<"------ " <<std::endl;
+        }
+
+        std::vector<int8_t> opins;
+        for(auto gate : gates){
+            if(gate.use_count() == 2){
+                opins.push_back(gate->getOutput());
+            }
+        }
+        return opins;
+    }
 };
 
 LogicCircuit circuit;
@@ -111,6 +158,59 @@ void displayMenu()
     std::cout << "3. Display truth table\n";
     std::cout << "4. Exit\n";
     std::cout << "Command: ";
+}
+
+// 打印分隔線
+void printSeparator(int length) {
+    for (int i = 0; i < length; ++i) {
+        std::cout << "-";
+    }
+    std::cout << "+" << "--" << std::endl;
+}
+
+void printSRheader(size_t i_size, size_t o_size){
+    for (size_t i = 0; i < i_size; ++i) {
+        std::cout << "i";
+    }
+    std::cout << "|" ;
+    for (size_t i = 0; i < o_size; ++i) {
+        std::cout << "o";
+    }
+    std::cout  <<  std::endl;
+}
+// 顯示模擬結果
+void displaySimulationResult(const std::vector<int8_t>& ipins, const std::vector<int8_t>& opins) {
+    std::cout << "Simulation Result:" << std::endl;
+
+    // 打印頭部，根據 ipins 的長度動態生成
+    printSRheader(ipins.size(), opins.size());
+
+    // 打印矢量索引
+    for (size_t i = 0; i < ipins.size(); ++i) {
+        std::cout << i + 1;
+    }
+    std::cout << "|";
+
+    for (size_t i = 0; i < opins.size(); ++i) {
+        std::cout << i + 1;
+    }
+    std::cout  <<  std::endl;
+
+    // 打印分隔線
+    printSeparator(ipins.size() + 2);
+
+    // 打印 ipins
+    for (auto val : ipins) {
+        std::cout << static_cast<int>(val);
+    }
+    std::cout << "|";
+
+    // 打印 outps
+    for (auto val : opins) {
+        std::cout << static_cast<int>(val);
+    }
+
+    std::cout  <<  std::endl;
 }
 
 bool loadCircuit()
@@ -133,7 +233,31 @@ bool loadCircuit()
 
 void runSimulation()
 {
-    // 實現模擬邏輯
+    std::vector<int8_t> ipins(circuit.get_gatesCount());
+    for (int i = 0; i < circuit.get_gatesCount(); ++i) {
+        int in;
+        do {
+            std::cout << "Please key in the value of input pin " << i + 1 << ": ";
+            std::cin >> in;
+            if (in != 0 && in != 1) {
+                std::cout << "The value of input pin must be 0/1" <<ipins[i]<< std::endl;
+            }
+        } while(in!= 0 && in != 1);
+        ipins[i]= in;
+    }
+    std::vector<int8_t> outps = circuit.simuulate(ipins);
+    displaySimulationResult(ipins,outps);
+}
+
+void generateInputCombinations(std::vector<std::vector<int8_t>>& combinations) {
+    int totalCombinations = std::pow(2, circuit.get_inputPinsCount());
+    for (int i = 0; i < totalCombinations; ++i) {
+        std::vector<int8_t> combination;
+        for (int j = 0; j < circuit.get_inputPinsCount(); ++j) {
+            combination.push_back((i >> j) & 1);
+        }
+        combinations.push_back(combination);
+    }
 }
 
 int main()
@@ -154,7 +278,7 @@ int main()
         case 2:
             if (circuitLoaded)
             {
-                // runSimulation();
+                runSimulation();
             }
             else
             {
@@ -177,6 +301,8 @@ int main()
         case 5:
             std::cout << "Test.\n";
             circuit.loadFromFile("File1.lcf");
+            runSimulation();
+            break;
         default:
             std::cout << "Invalid command. Please try again.\n";
             
