@@ -20,6 +20,13 @@ int8_t LogicGate::getOutput() {
     return output_;
 }
 
+void LogicGate::reset() {
+    // if (!isHaveAlliPinValue()) {
+    //     throw std::runtime_error("Not all input pins have values.");
+    // }
+    // compute();
+    output_ = UNINITIALIZED;
+}
 void LogicGate::addInputPin(std::shared_ptr<LogicGate> pin) {
     ipin_vector_.push_back(pin);
 }
@@ -37,10 +44,10 @@ void LogicGate::addInputPin(int8_t input) {
 // }
 
 void AndGate::compute() {
-    std::cout<<"And comput: "<<std::endl;
+    // std::cout<<"And comput: "<<std::endl;
     output_ = 1;
     for (const auto& pin : ipin_vector_) {
-        std::cout<<pin<<", ";
+        // std::cout<<pin<<", ";
         int8_t pinOutput = pin->getOutput();
         if (pinOutput == UNINITIALIZED) {
             output_ = UNINITIALIZED;
@@ -56,10 +63,10 @@ void AndGate::compute() {
 // }
 
 void OrGate::compute() {
-    std::cout<<"Or comput: "<<std::endl;
+    // std::cout<<"Or comput: "<<std::endl;
     output_ = 0;
     for (const auto& pin : ipin_vector_) {
-        std::cout<<pin<<", ";
+        // std::cout<<pin<<", ";
         int8_t pinOutput = pin->getOutput();
         if (pinOutput == UNINITIALIZED) {
             output_ = UNINITIALIZED;
@@ -78,11 +85,11 @@ void OrGate::compute() {
 // }
 
 void NotGate::compute() {
-    std::cout<<"Not comput: "<<std::endl;
+    // std::cout<<"Not comput: "<<std::endl;
     if (ipin_vector_.size() != 1) {
         throw std::logic_error("NotGate requires exactly one input.");
     }
-    std::cout<<ipin_vector_[0]<<", ";
+    // std::cout<<ipin_vector_[0]<<", ";
     int8_t pinOutput = ipin_vector_[0]->getOutput();
     if (pinOutput == UNINITIALIZED) {
         output_ = UNINITIALIZED;

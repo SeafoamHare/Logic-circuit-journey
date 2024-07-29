@@ -28,8 +28,8 @@ public:
             return false;
         }
         file >> inputPinsCount >> gatesCount;
-        std::cout << inputPinsCount << std::endl;
-        std::cout << gatesCount << std::endl;
+        // std::cout << inputPinsCount << std::endl;
+        // std::cout << gatesCount << std::endl;
 
         // Initialize iPins
         _iPins.resize(inputPinsCount);
@@ -46,17 +46,17 @@ public:
         {
             int gateType;
             file >> gateType;
-            std::cout << "Type: " << gateType << std::endl;
+            // std::cout << "Type: " << gateType << std::endl;
             std::vector<int> inputs;
             float input;
             while (file >> input && input != 0)
             {
                 int ii = (int)input;
-                std::cout << ii << " ";
+                // std::cout << ii << " ";
                 gatesiPin_list[i].push_back(ii);
                 
             }
-            std::cout<<" "<<std::endl;
+            // std::cout<<" "<<std::endl;
             std::shared_ptr<LogicGate> newGate;
             switch (gateType)
             {
@@ -78,7 +78,7 @@ public:
             {
                 gates[i] = newGate;
             }
-            std::cout<<gates[i]<<std::endl;
+            // std::cout<<gates[i]<<std::endl;
         }
 
         for(int i=0; i<gatesCount; i++){
@@ -115,12 +115,10 @@ public:
 
     std::vector<int8_t> simuulate(std::vector<int8_t> iPins)
     {
-        std::cout<<"Simuulate"<<std::endl;
+        // std::cout<<"Simuulate"<<std::endl;
         for(int i=0; i<inputPinsCount; i++)
         {
             _iPins[i]->addInputPin(iPins[i]);
-            std::cout<<_iPins[i]<<" ";
-            std::cout<<_iPins[i]->getOutput()<<" ";
         }
 
        
@@ -129,14 +127,14 @@ public:
             undone = false;
             for(int i=0; i<gatesCount; i++)
             {
-                std::cout<<"point: "<<gates[i]<<std::endl;
+                // std::cout<<"point: "<<gates[i]<<" ";
                 if(gates[i]->getOutput()==UNINITIALIZED){
                     undone=true;
                     gates[i]->compute();
                 }
-                std::cout<<"oup; "<<static_cast<int>(gates[i]->getOutput())<<std::endl;
+                // std::cout<<"oup; "<<static_cast<int>(gates[i]->getOutput())<<std::endl;
             }
-            std::cout<<"------ " <<std::endl;
+            // std::cout<<"------ " <<std::endl;
         }
 
         std::vector<int8_t> opins;
@@ -144,6 +142,11 @@ public:
             if(gate.use_count() == 2){
                 opins.push_back(gate->getOutput());
             }
+        }
+
+        for(int i=0; i<gatesCount; i++)
+        {
+            gates[i]->reset();
         }
         return opins;
     }
@@ -177,27 +180,23 @@ void printSRheader(size_t i_size, size_t o_size){
         std::cout << "o";
     }
     std::cout  <<  std::endl;
-}
-// 顯示模擬結果
-void displaySimulationResult(const std::vector<int8_t>& ipins, const std::vector<int8_t>& opins) {
-    std::cout << "Simulation Result:" << std::endl;
-
-    // 打印頭部，根據 ipins 的長度動態生成
-    printSRheader(ipins.size(), opins.size());
-
     // 打印矢量索引
-    for (size_t i = 0; i < ipins.size(); ++i) {
+    for (size_t i = 0; i < i_size; ++i) {
         std::cout << i + 1;
     }
     std::cout << "|";
 
-    for (size_t i = 0; i < opins.size(); ++i) {
+    for (size_t i = 0; i < o_size; ++i) {
         std::cout << i + 1;
     }
     std::cout  <<  std::endl;
-
     // 打印分隔線
-    printSeparator(ipins.size() + 2);
+    printSeparator(i_size + 2);
+}
+// 顯示模擬結果
+void displaySimulationResult(const std::vector<int8_t>& ipins, const std::vector<int8_t>& opins) {
+
+    
 
     // 打印 ipins
     for (auto val : ipins) {
@@ -246,17 +245,37 @@ void runSimulation()
         ipins[i]= in;
     }
     std::vector<int8_t> outps = circuit.simuulate(ipins);
+    std::cout << "Simulation Result:" << std::endl;
+    // 打印頭部，根據 ipins 的長度動態生成
+    printSRheader(ipins.size(), outps.size());
     displaySimulationResult(ipins,outps);
 }
 
-void generateInputCombinations(std::vector<std::vector<int8_t>>& combinations) {
+void generateInputCombinations() {
     int totalCombinations = std::pow(2, circuit.get_inputPinsCount());
+    std::cout << "TruthTable Result:" << std::endl;
     for (int i = 0; i < totalCombinations; ++i) {
-        std::vector<int8_t> combination;
+        std::vector<int8_t> ipins;
+        // std::cout<<ipins.size()<<std::endl;
+        // std::cout<<"ip: ";
         for (int j = 0; j < circuit.get_inputPinsCount(); ++j) {
-            combination.push_back((i >> j) & 1);
+            int8_t ip = (i >> j) & 1;
+            // std::cout<<static_cast<int>(ip)<<" ";
+            ipins.push_back(ip);
         }
-        combinations.push_back(combination);
+        // for(auto a: ipins){
+        //     std::cout<<static_cast<int>(a)<<" ";
+        // }
+        // std::cout<<"done comb------ "<<std::endl;
+        
+        std::vector<int8_t> outps = circuit.simuulate(ipins);
+        if(i==0){
+            // std::cout<<ipins.size()<<std::endl;
+            // 打印頭部，根據 ipins 的長度動態生成
+            printSRheader(ipins.size(), outps.size());
+        }
+
+        displaySimulationResult(ipins,outps);
     }
 }
 
@@ -288,6 +307,7 @@ int main()
         case 3:
             if (circuitLoaded)
             {
+                generateInputCombinations();
                 // circuit.displayTruthTable();
             }
             else

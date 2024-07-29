@@ -14,7 +14,7 @@ public:
     virtual ~LogicGate() = default;
     bool isHaveAlliPinValue() const;
     int8_t getOutput();
-
+    void reset();
     /// @overload
     /// @brief LogicGet for And, Or, Not
     void addInputPin(std::shared_ptr<LogicGate> pin);
