@@ -3,14 +3,14 @@
 // LogicGate
 LogicGate::LogicGate() : output_(UNINITIALIZED) {}
 
-bool LogicGate::isHaveAlliPinValue() const {
-    for (const auto& pin : ipin_vector_) {
-        if (pin == nullptr || pin->getOutput() == UNINITIALIZED) {
-            return false;
-        }
-    }
-    return true;
-}
+// bool LogicGate::isHaveAlliPinValue() const {
+//     for (const auto& pin : ipin_vector_) {
+//         if (pin == nullptr || pin->getOutput() == UNINITIALIZED) {
+//             return false;
+//         }
+//     }
+//     return true;
+// }
 
 int8_t LogicGate::getOutput() {
     // if (!isHaveAlliPinValue()) {

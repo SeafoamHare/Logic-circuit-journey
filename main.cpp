@@ -15,7 +15,6 @@ private:
     int gatesCount;
     std::vector<std::shared_ptr<LogicGate>> gates;
     std::vector<std::shared_ptr<LogicGate>> _iPins;
-    std::vector<int8_t> _oPins;
 
 public:
     bool loadFromFile(const std::string &filePath)
@@ -107,11 +106,11 @@ public:
         return gatesCount;
     }
 
-    void printCircuitInfo()
-    {
-        std::cout << "Circuit: " << inputPinsCount << " input pins, 1 output pin and "
-                  << gatesCount << " gates\n";
-    }
+    // void printCircuitInfo()
+    // {
+    //     std::cout << "Circuit: " << inputPinsCount << " input pins, 1 output pin and "
+    //               << gatesCount << " gates\n";
+    // }
 
     std::vector<int8_t> simuulate(std::vector<int8_t> iPins)
     {
@@ -152,7 +151,6 @@ public:
     }
 };
 
-LogicCircuit circuit;
 
 void displayMenu()
 {
@@ -160,6 +158,7 @@ void displayMenu()
     std::cout << "2. Simulation\n";
     std::cout << "3. Display truth table\n";
     std::cout << "4. Exit\n";
+    std::cout << "5. Test.\n";
     std::cout << "Command: ";
 }
 
@@ -195,9 +194,6 @@ void printSRheader(size_t i_size, size_t o_size){
 }
 // 顯示模擬結果
 void displaySimulationResult(const std::vector<int8_t>& ipins, const std::vector<int8_t>& opins) {
-
-    
-
     // 打印 ipins
     for (auto val : ipins) {
         std::cout << static_cast<int>(val);
@@ -211,76 +207,84 @@ void displaySimulationResult(const std::vector<int8_t>& ipins, const std::vector
 
     std::cout  <<  std::endl;
 }
+LogicCircuit circuit;
+class TextUI{    
 
-bool loadCircuit()
-{
-    std::string filePath;
-    std::cout << "Please key in a file path: ";
-    std::cin >> filePath;
-
-    if (circuit.loadFromFile(filePath))
+public:
+    bool loadCircuit()
     {
-        std::cout << "Circuit: [Details about the loaded circuit]\n";
-        return true;
-    }
-    else
-    {
-        std::cout << "File not found or file format error!!\n";
-        return false;
-    }
-}
+        std::string filePath;
+        std::cout << "Please key in a file path: ";
+        std::cin >> filePath;
 
-void runSimulation()
-{
-    std::vector<int8_t> ipins(circuit.get_gatesCount());
-    for (int i = 0; i < circuit.get_gatesCount(); ++i) {
-        int in;
-        do {
-            std::cout << "Please key in the value of input pin " << i + 1 << ": ";
-            std::cin >> in;
-            if (in != 0 && in != 1) {
-                std::cout << "The value of input pin must be 0/1" <<ipins[i]<< std::endl;
-            }
-        } while(in!= 0 && in != 1);
-        ipins[i]= in;
-    }
-    std::vector<int8_t> outps = circuit.simuulate(ipins);
-    std::cout << "Simulation Result:" << std::endl;
-    // 打印頭部，根據 ipins 的長度動態生成
-    printSRheader(ipins.size(), outps.size());
-    displaySimulationResult(ipins,outps);
-}
-
-void generateInputCombinations() {
-    int totalCombinations = std::pow(2, circuit.get_inputPinsCount());
-    std::cout << "TruthTable Result:" << std::endl;
-    for (int i = 0; i < totalCombinations; ++i) {
-        std::vector<int8_t> ipins;
-        // std::cout<<ipins.size()<<std::endl;
-        // std::cout<<"ip: ";
-        for (int j = 0; j < circuit.get_inputPinsCount(); ++j) {
-            int8_t ip = (i >> j) & 1;
-            // std::cout<<static_cast<int>(ip)<<" ";
-            ipins.push_back(ip);
+        if (circuit.loadFromFile(filePath))
+        {
+            std::cout << "Circuit Load down\n";
+            return true;
         }
-        // for(auto a: ipins){
-        //     std::cout<<static_cast<int>(a)<<" ";
-        // }
-        // std::cout<<"done comb------ "<<std::endl;
-        
+        else
+        {
+            std::cout << "File not found or file format error!!\n";
+            return false;
+        }
+    }
+
+    void runSimulation()
+    {
+        std::vector<int8_t> ipins(circuit.get_gatesCount());
+        for (int i = 0; i < circuit.get_gatesCount(); ++i)
+        {
+            int in;
+            do
+            {
+                std::cout << "Please key in the value of input pin " << i + 1 << ": ";
+                std::cin >> in;
+                if (in != 0 && in != 1)
+                {
+                    std::cout << "The value of input pin must be 0/1" << ipins[i] << std::endl;
+                }
+            } while (in != 0 && in != 1);
+            ipins[i] = in;
+        }
         std::vector<int8_t> outps = circuit.simuulate(ipins);
-        if(i==0){
-            // std::cout<<ipins.size()<<std::endl;
-            // 打印頭部，根據 ipins 的長度動態生成
-            printSRheader(ipins.size(), outps.size());
-        }
-
-        displaySimulationResult(ipins,outps);
+        std::cout << "Simulation Result:" << std::endl;
+        // 打印
+        printSRheader(ipins.size(), outps.size());
+        displaySimulationResult(ipins, outps);
     }
-}
+
+    void generateInputCombinations()
+    {
+        int totalCombinations = std::pow(2, circuit.get_inputPinsCount());
+        std::cout << "TruthTable Result:" << std::endl;
+        for (int i = 0; i < totalCombinations; ++i)
+        {
+            std::vector<int8_t> ipins(circuit.get_inputPinsCount());
+            for (int j = 0; j < circuit.get_inputPinsCount(); ++j)
+            {
+                int8_t ip = (i >> j) & 1;
+                ipins[circuit.get_inputPinsCount() - j - 1] = ip;
+            }
+            // for(auto a: ipins){
+            //     std::cout<<static_cast<int>(a)<<" ";
+            // }
+            // std::cout<<"done comb------ "<<std::endl;
+
+            std::vector<int8_t> outps = circuit.simuulate(ipins);
+            if (i == 0)
+            {
+                // 打印頭部
+                printSRheader(ipins.size(), outps.size());
+            }
+
+            displaySimulationResult(ipins, outps);
+        }
+    }
+};
 
 int main()
 {
+    TextUI textui;
     int command;
     bool circuitLoaded = false;
 
@@ -292,12 +296,12 @@ int main()
         switch (command)
         {
         case 1:
-            circuitLoaded = loadCircuit();
+            circuitLoaded = textui.loadCircuit();
             break;
         case 2:
             if (circuitLoaded)
             {
-                runSimulation();
+                textui.runSimulation();
             }
             else
             {
@@ -307,8 +311,7 @@ int main()
         case 3:
             if (circuitLoaded)
             {
-                generateInputCombinations();
-                // circuit.displayTruthTable();
+                textui.generateInputCombinations();
             }
             else
             {
@@ -321,7 +324,7 @@ int main()
         case 5:
             std::cout << "Test.\n";
             circuit.loadFromFile("File1.lcf");
-            runSimulation();
+            textui.runSimulation();
             break;
         default:
             std::cout << "Invalid command. Please try again.\n";

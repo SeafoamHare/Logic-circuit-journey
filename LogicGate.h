@@ -12,7 +12,7 @@ class LogicGate {
 public:
     LogicGate();
     virtual ~LogicGate() = default;
-    bool isHaveAlliPinValue() const;
+    //bool isHaveAlliPinValue() const;
     int8_t getOutput();
     void reset();
     /// @overload
