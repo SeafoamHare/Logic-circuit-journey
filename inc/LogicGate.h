@@ -8,52 +8,48 @@
 #include <cstdint>
 
 const int8_t UNINITIALIZED = -1;
-class LogicGate {
+class LogicGate
+{
 public:
     LogicGate();
     virtual ~LogicGate() = default;
-    //bool isHaveAlliPinValue() const;
     int8_t getOutput();
     void reset();
+
     /// @overload
     /// @brief LogicGet for And, Or, Not
     void addInputPin(std::shared_ptr<LogicGate> pin);
     /// @brief for InputPin
     void addInputPin(int8_t pin);
-    virtual void compute() = 0; 
+
+    virtual void compute() = 0;
+
 protected:
     std::vector<std::shared_ptr<LogicGate>> ipin_vector_;
-    int8_t output_ = UNINITIALIZED; 
+    int8_t output_ = UNINITIALIZED;
 };
 
-class AndGate : public LogicGate {
+class AndGate : public LogicGate
+{
 public:
-    // AndGate(std::vector<std::shared_ptr<LogicGate>> inputVector);
-
-
     void compute() override;
 };
 
-class OrGate : public LogicGate {
+class OrGate : public LogicGate
+{
 public:
-    // OrGate(std::vector<std::shared_ptr<LogicGate>> inputVector);
-
-
     void compute() override;
 };
 
-class NotGate : public LogicGate {
+class NotGate : public LogicGate
+{
 public:
-    // NotGate(std::vector<std::shared_ptr<LogicGate>> inputVector);
-
-
     void compute() override;
 };
 
-class InputPin : public LogicGate {
+class InputPin : public LogicGate
+{
 public:
-    // InputPin(std::vector<std::shared_ptr<LogicGate>> inputVector);
-    // InputPin(int8_t input);
     void compute() override;
 };
 
