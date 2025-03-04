@@ -21,8 +21,8 @@ MAIN_OBJ = $(MAIN_SRC:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 TEST_SRCS = $(wildcard $(TEST_DIR)/*.cpp)
 TEST_OBJS = $(TEST_SRCS:$(TEST_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
-EXE = my_executable
-TEST_EXE = runTests
+EXE = my_executable.o
+TEST_EXE = runTests.o
 
 # Build targets
 all: $(EXE) $(TEST_EXE)
