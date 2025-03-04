@@ -122,7 +122,7 @@ void LogicCircuitController::runSimulation()
             {
                 if (in == 0 || in == 1)
                 {
-                    break; // 有效輸入，退出循環
+                    break;
                 }
                 else
                 {

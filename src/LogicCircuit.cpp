@@ -32,7 +32,7 @@ bool LogicCircuit::loadFromFile(const std::string &filePath)
 
     if (!file.is_open())
     {
-        std::cerr << "無法開啟檔案" << std::endl;
+        std::cerr << "Cannot open the file." << std::endl;
         return false;
     }
     file >> inputPinsCount >> gatesCount;

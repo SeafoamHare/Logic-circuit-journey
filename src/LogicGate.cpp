@@ -64,7 +64,6 @@ void NotGate::compute() {
 
 // InputPin
 void InputPin::compute() {
-    // InputPin does not need to compute, output is already set.
     throw std::logic_error("InputPin does not need to compute, output is already set.");
 }
 

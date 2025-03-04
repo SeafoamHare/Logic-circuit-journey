@@ -7,7 +7,6 @@
 #include <stdexcept>
 
 /*-------------LogicGate---------------*/
-// 僅用為測試 LogicGate 類
 class TestLogicGate : public LogicGate
 {
 public:
@@ -17,7 +16,6 @@ public:
     }
 };
 
-// 測試 LogicGate 類
 TEST(LogicGateTest, DefaultOutput)
 {
     TestLogicGate gate;
@@ -120,11 +118,9 @@ TEST(LogicCircuitTest, OutputPinsCount)
 {
     LogicCircuit circuit;
 
-    // Test for File1.lcf
     ASSERT_TRUE(circuit.loadFromFile("File1.lcf"));
     EXPECT_EQ(circuit.getOutputPinsCount(), 1);
 
-    // Test for File2.lcf
     ASSERT_TRUE(circuit.loadFromFile("File2.lcf"));
     EXPECT_EQ(circuit.getOutputPinsCount(), 3);
 }
@@ -134,12 +130,10 @@ TEST(LogicCircuitTest, Simulation_File1)
     LogicCircuit circuit;
     ASSERT_TRUE(circuit.loadFromFile("File1.lcf"));
 
-    // Test input {0, 1, 1} expecting output {0}
     std::vector<int8_t> inputs1 = {0, 1, 1};
     std::vector<int8_t> expected_outputs1 = {0};
     EXPECT_EQ(circuit.simuulate(inputs1), expected_outputs1);
 
-    // Test input {1, 0, 1} expecting output {1}
     std::vector<int8_t> inputs2 = {1, 0, 1};
     std::vector<int8_t> expected_outputs2 = {1};
     EXPECT_EQ(circuit.simuulate(inputs2), expected_outputs2);
@@ -150,12 +144,10 @@ TEST(LogicCircuitTest, Simulation_File2)
     LogicCircuit circuit;
     ASSERT_TRUE(circuit.loadFromFile("File2.lcf"));
 
-    // Test input {1, 0, 0, 1} expecting output {1, 0, 0}
     std::vector<int8_t> inputs1 = {1, 0, 0, 1};
     std::vector<int8_t> expected_outputs1 = {1, 0, 0};
     EXPECT_EQ(circuit.simuulate(inputs1), expected_outputs1);
 
-    // Test input {1, 0, 1, 0} expecting output {1, 0, 1}
     std::vector<int8_t> inputs2 = {1, 0, 1, 0};
     std::vector<int8_t> expected_outputs2 = {1, 0, 1};
     EXPECT_EQ(circuit.simuulate(inputs2), expected_outputs2);
