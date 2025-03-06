@@ -8,8 +8,8 @@
 class LogicCircuitController
 {
 private:
-    LogicCircuit circuit;
-    TextUI textui;
+    LogicCircuit _circuit;
+    TextUI _textui;
     
 public:
     

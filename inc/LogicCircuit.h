@@ -11,11 +11,11 @@
 class LogicCircuit
 {
 private:
-    int inputPinsCount;
-    int gatesCount;
-    std::vector<std::vector<int>> gatesiPin_list;
+    int _inputPinsCount;
+    int _gatesCount;
+    std::vector<std::vector<int>> _gatesiPin_list;
 
-    std::vector<std::shared_ptr<LogicGate>> gates;
+    std::vector<std::shared_ptr<LogicGate>> _gates;
     std::vector<std::shared_ptr<LogicGate>> _iPins;
 
 public:
@@ -23,17 +23,17 @@ public:
 
     const int getInputPinsCount()
     {
-        return inputPinsCount;
+        return _inputPinsCount;
     }
 
     const int getOutputPinsCount();
     
     const int getGatesCount()
     {
-        return gatesCount;
+        return _gatesCount;
     }
 
-    std::vector<int8_t> simuulate(std::vector<int8_t> iPins);
+    std::vector<int8_t> simuulate(std::vector<int8_t> _iPins);
 };
 
 #endif // LOGICCIRUIT_H

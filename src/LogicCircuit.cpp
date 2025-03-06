@@ -6,7 +6,7 @@ const int LogicCircuit::getOutputPinsCount()
 {
     std::unordered_set<int> seenNumbers;
 
-    for (const auto &row : gatesiPin_list)
+    for (const auto &row : _gatesiPin_list)
     {
         for (size_t i = 0; i < row.size(); i++)
         {
@@ -15,7 +15,7 @@ const int LogicCircuit::getOutputPinsCount()
     }
 
     int count = 0;
-    for (int i = 1; i <= gatesCount; i++)
+    for (int i = 1; i <= _gatesCount; i++)
     {
         if (seenNumbers.find(i) == seenNumbers.end())
         {
@@ -35,22 +35,22 @@ bool LogicCircuit::loadFromFile(const std::string &filePath)
         std::cerr << "Cannot open the file." << std::endl;
         return false;
     }
-    file >> inputPinsCount >> gatesCount;
+    file >> _inputPinsCount >> _gatesCount;
 
     // Initialize iPins
     _iPins.clear();
-    _iPins.resize(inputPinsCount);
-    for (int i = 0; i < inputPinsCount; i++)
+    _iPins.resize(_inputPinsCount);
+    for (int i = 0; i < _inputPinsCount; i++)
     {
         _iPins[i] = std::make_shared<InputPin>();
     }
 
     // Initialize gates
-    gates.clear();
-    gates.resize(gatesCount);
-    gatesiPin_list.clear();
-    gatesiPin_list.resize(gatesCount);
-    for (int i = 0; i < gatesCount; i++)
+    _gates.clear();
+    _gates.resize(_gatesCount);
+    _gatesiPin_list.clear();
+    _gatesiPin_list.resize(_gatesCount);
+    for (int i = 0; i < _gatesCount; i++)
     {
         int gateType;
         file >> gateType;
@@ -59,7 +59,7 @@ bool LogicCircuit::loadFromFile(const std::string &filePath)
         while (file >> input && input != 0)
         {
             int ii = (int)input;
-            gatesiPin_list[i].push_back(ii);
+            _gatesiPin_list[i].push_back(ii);
         }
         std::shared_ptr<LogicGate> newGate;
         switch (gateType)
@@ -80,20 +80,20 @@ bool LogicCircuit::loadFromFile(const std::string &filePath)
 
         if (newGate)
         {
-            gates[i] = newGate;
+            _gates[i] = newGate;
         }
     }
-    for (int i = 0; i < gatesCount; i++)
+    for (int i = 0; i < _gatesCount; i++)
     {
-        for (auto ipin : gatesiPin_list[i])
+        for (auto ipin : _gatesiPin_list[i])
         {
             if (ipin < 0)
             {
-                gates[i]->addInputPin(_iPins[-ipin - 1]);
+                _gates[i]->addInputPin(_iPins[-ipin - 1]);
             }
             else
             {
-                gates[i]->addInputPin(gates[ipin - 1]);
+                _gates[i]->addInputPin(_gates[ipin - 1]);
             }
         }
     }
@@ -104,7 +104,7 @@ bool LogicCircuit::loadFromFile(const std::string &filePath)
 
 std::vector<int8_t> LogicCircuit::simuulate(std::vector<int8_t> iPins)
 {
-    for (int i = 0; i < inputPinsCount; i++)
+    for (int i = 0; i < _inputPinsCount; i++)
     {
         _iPins[i]->addInputPin(iPins[i]);
     }
@@ -113,18 +113,18 @@ std::vector<int8_t> LogicCircuit::simuulate(std::vector<int8_t> iPins)
     while (undone)
     {
         undone = false;
-        for (int i = 0; i < gatesCount; i++)
+        for (int i = 0; i < _gatesCount; i++)
         {
-            if (gates[i]->getOutput() == UNINITIALIZED)
+            if (_gates[i]->getOutput() == UNINITIALIZED)
             {
                 undone = true;
-                gates[i]->compute();
+                _gates[i]->compute();
             }
         }
     }
 
     std::vector<int8_t> opins;
-    for (auto gate : gates)
+    for (auto gate : _gates)
     {
         if (gate.use_count() == 2)
         {
@@ -132,9 +132,9 @@ std::vector<int8_t> LogicCircuit::simuulate(std::vector<int8_t> iPins)
         }
     }
 
-    for (int i = 0; i < gatesCount; i++)
+    for (int i = 0; i < _gatesCount; i++)
     {
-        gates[i]->reset();
+        _gates[i]->reset();
     }
     return opins;
 }

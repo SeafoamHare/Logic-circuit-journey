@@ -15,7 +15,7 @@ void LogicCircuitController::run_Application()
 
     while (true)
     {
-        textui.displayMenu();
+        _textui.displayMenu();
         std::getline(std::cin, input);
 
         // 去除前後空白
@@ -81,11 +81,11 @@ bool LogicCircuitController::loadCircuit()
         return false;
     }
 
-    if (circuit.loadFromFile(filePath))
+    if (_circuit.loadFromFile(filePath))
     {
-        textui.displayCircuitLoadedResult(circuit.getInputPinsCount(),
-                                          circuit.getOutputPinsCount(),
-                                          circuit.getGatesCount());
+        _textui.displayCircuitLoadedResult(_circuit.getInputPinsCount(),
+        _circuit.getOutputPinsCount(),
+        _circuit.getGatesCount());
         return true;
     }
     else
@@ -97,8 +97,8 @@ bool LogicCircuitController::loadCircuit()
 
 void LogicCircuitController::runSimulation()
 {
-    std::vector<int8_t> ipins(circuit.getInputPinsCount());
-    for (int i = 0; i < circuit.getInputPinsCount(); i++)
+    std::vector<int8_t> ipins(_circuit.getInputPinsCount());
+    for (int i = 0; i < _circuit.getInputPinsCount(); i++)
     {
         int in;
         std::string input;
@@ -136,33 +136,33 @@ void LogicCircuitController::runSimulation()
         } while (true);
         ipins[i] = in;
     }
-    std::vector<int8_t> outps = circuit.simuulate(ipins);
+    std::vector<int8_t> outps = _circuit.simuulate(ipins);
     std::cout << "Simulation Result:" << std::endl;
     // 打印
-    textui.printSRheader(ipins.size(), outps.size());
-    textui.displaySimulationResult(ipins, outps);
+    _textui.printSRheader(ipins.size(), outps.size());
+    _textui.displaySimulationResult(ipins, outps);
 }
 
 void LogicCircuitController::generateInputCombinations()
 {
-    int totalCombinations = std::pow(2, circuit.getInputPinsCount());
+    int totalCombinations = std::pow(2, _circuit.getInputPinsCount());
     std::cout << "TruthTable Result:" << std::endl;
     for (int i = 0; i < totalCombinations; ++i)
     {
-        std::vector<int8_t> ipins(circuit.getInputPinsCount());
-        for (int j = 0; j < circuit.getInputPinsCount(); ++j)
+        std::vector<int8_t> ipins(_circuit.getInputPinsCount());
+        for (int j = 0; j < _circuit.getInputPinsCount(); ++j)
         {
             int8_t ip = (i >> j) & 1;
-            ipins[circuit.getInputPinsCount() - j - 1] = ip;
+            ipins[_circuit.getInputPinsCount() - j - 1] = ip;
         }
 
-        std::vector<int8_t> outps = circuit.simuulate(ipins);
+        std::vector<int8_t> outps = _circuit.simuulate(ipins);
         if (i == 0)
         {
             // 打印頭部
-            textui.printSRheader(ipins.size(), outps.size());
+            _textui.printSRheader(ipins.size(), outps.size());
         }
 
-        textui.displaySimulationResult(ipins, outps);
+        _textui.displaySimulationResult(ipins, outps);
     }
 }
